@@ -14,7 +14,7 @@ export function TaskColumn({title, tasks}: TaskColumnProps) {
                 <Title order={4}>
                     {title} <span> ({tasks.length}) </span>
                 </Title>
-                <Button size="xs">+ Nova Tarefa</Button>
+                <Button size="xs">+</Button>
             </div>
             <Stack>
                 {tasks.map((task) => (
