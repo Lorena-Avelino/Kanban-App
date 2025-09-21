@@ -26,21 +26,21 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
       title,
       description,
       status,
-      order: tasks.filter((t) => t.status === status).length,
+      order: tasks.filter((task) => task.status === status).length,
     };
     setTasks([...tasks, newTask]);
   };
 
   const editTask = (id: string, updates: Partial<Task>) => {
-    setTasks(tasks.map((t) => (t.id === id ? { ...t, ...updates } : t)));
+    setTasks(tasks.map((task) => (task.id === id ? { ...task, ...updates } : task)));
   };
 
   const removeTask = (id: string) => {
-    setTasks(tasks.filter((t) => t.id !== id));
+    setTasks(tasks.filter((task) => task.id !== id));
   };
 
   const moveTask = (id: string, status: Task["status"], order = 0) => {
-    setTasks(tasks.map((t) => (t.id === id ? { ...t, status, order } : t)));
+    setTasks(tasks.map((task) => (task.id === id ? { ...task, status, order } : task)));
   };
 
   return (
