@@ -32,7 +32,9 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
   };
 
   const editTask = (id: string, updates: Partial<Task>) => {
-    setTasks(tasks.map((task) => (task.id === id ? { ...task, ...updates } : task)));
+    setTasks(
+      tasks.map((task) => (task.id === id ? { ...task, ...updates } : task))
+    );
   };
 
   const removeTask = (id: string) => {
@@ -40,7 +42,59 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
   };
 
   const moveTask = (id: string, status: Task["status"], order = 0) => {
-    setTasks(tasks.map((task) => (task.id === id ? { ...task, status, order } : task)));
+    setTasks((prev) => {
+      const moving = prev.find((task) => task.id === id);
+      if (!moving) return prev;
+
+      const sourceStatus = moving.status;
+      const destStatus = status;
+
+      const sourceList = prev
+        .filter((task) => task.status === sourceStatus && task.id !== id)
+        .sort((a, b) => a.order - b.order);
+
+      const destListBase = prev
+        .filter((task) => task.status === destStatus && task.id !== id)
+        .sort((a, b) => a.order - b.order);
+
+      if (sourceStatus === destStatus) {
+        const list = sourceList;
+        const toInsert = { ...moving, status: destStatus };
+        const safeIndex = Math.max(0, Math.min(order, list.length));
+        list.splice(safeIndex, order, toInsert);
+        const reindexed = list.map((task, i) => ({ ...task, order: i }));
+
+        return prev.map((task) => {
+          if (task.status !== destStatus) return task;
+          const found = reindexed.find((x) => x.id === task.id);
+          return found ?? (task.id === id ? toInsert : task);
+        });
+      } else {
+        const sourceRe = sourceList.map((task, i) => ({ ...task, order: i }));
+
+        const toInsert = { ...moving, status: destStatus };
+        const destList = [...destListBase];
+        const safeIndex = Math.max(0, Math.min(order, destList.length));
+        destList.splice(safeIndex, order, toInsert);
+        const destRe = destList.map((task, i) => ({ ...task, order: i }));
+
+        return prev.map((task) => {
+          if (task.id === id) {
+            const found = destRe.find((x) => x.id === id);
+            return found ?? toInsert;
+          }
+          if (task.status === sourceStatus) {
+            const r = sourceRe.find((x) => x.id === task.id);
+            return r ?? task;
+          }
+          if (task.status === destStatus) {
+            const r = destRe.find((x) => x.id === task.id);
+            return r ?? task;
+          }
+          return task;
+        });
+      }
+    });
   };
 
   return (
