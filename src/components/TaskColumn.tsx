@@ -16,7 +16,7 @@ interface TaskColumnProps {
 export function TaskColumn({ title, status, tasks, onEdit }: TaskColumnProps) {
   const { removeTask } = useTasks();
 
-  const filteredTasks = tasks.filter((task) => task.status === status);
+  const filteredTasks = tasks.filter((task) => task.status === status).sort((a, b) => a.order - b.order);
 
   const handleEdit = (task: Task) => {
     onEdit ? onEdit(task) : () => {};

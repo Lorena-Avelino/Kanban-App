@@ -50,51 +50,34 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
       const sourceStatus = moving.status;
       const destStatus = status;
 
-      const sourceList = prev
-        .filter((task) => task.status === sourceStatus && task.id !== id)
+      let updated = prev.filter((task) => task.id !== id);
+
+      const destList = updated
+        .filter((task) => task.status === destStatus)
         .sort((a, b) => a.order - b.order);
 
-      const destListBase = prev
-        .filter((task) => task.status === destStatus && task.id !== id)
-        .sort((a, b) => a.order - b.order);
+      destList.splice(order, 0, { ...moving, status: destStatus });
 
+      const normalizedDest = destList.map((task, i) => ({ ...task, order: i }));
       if (sourceStatus === destStatus) {
-        const list = sourceList;
-        const toInsert = { ...moving, status: destStatus };
-        const safeIndex = Math.max(0, Math.min(order, list.length));
-        list.splice(safeIndex, order, toInsert);
-        const reindexed = list.map((task, i) => ({ ...task, order: i }));
-
-        return prev.map((task) => {
-          if (task.status !== destStatus) return task;
-          const found = reindexed.find((x) => x.id === task.id);
-          return found ?? (task.id === id ? toInsert : task);
-        });
-      } else {
-        const sourceRe = sourceList.map((task, i) => ({ ...task, order: i }));
-
-        const toInsert = { ...moving, status: destStatus };
-        const destList = [...destListBase];
-        const safeIndex = Math.max(0, Math.min(order, destList.length));
-        destList.splice(safeIndex, order, toInsert);
-        const destRe = destList.map((task, i) => ({ ...task, order: i }));
-
-        return prev.map((task) => {
-          if (task.id === id) {
-            const found = destRe.find((x) => x.id === id);
-            return found ?? toInsert;
-          }
-          if (task.status === sourceStatus) {
-            const r = sourceRe.find((x) => x.id === task.id);
-            return r ?? task;
-          }
-          if (task.status === destStatus) {
-            const r = destRe.find((x) => x.id === task.id);
-            return r ?? task;
-          }
-          return task;
-        });
+        return [
+          ...updated.filter((task) => task.status !== destStatus),
+          ...normalizedDest,
+        ];
       }
+
+      const sourceList = updated
+        .filter((task) => task.status === sourceStatus)
+        .sort((a, b) => a.order - b.order)
+        .map((task, i) => ({ ...task, order: i }));
+
+      return [
+        ...updated.filter(
+          (task) => task.status !== sourceStatus && task.status !== destStatus
+        ),
+        ...sourceList,
+        ...normalizedDest,
+      ];
     });
   };
 

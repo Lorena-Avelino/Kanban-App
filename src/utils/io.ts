@@ -23,13 +23,13 @@ export function importTasks(
     try {
       const parsed = JSON.parse(event.target?.result as string);
       if (Array.isArray(parsed) && parsed.every(isValidTask)) {
-        const restored = ["aFazer", "emProgresso", "concluido"].flatMap(
+        const reindexed = ["aFazer", "emProgresso", "concluido"].flatMap(
           (status) =>
             parsed
-              .filter((task) => task.status === status)
+              .filter((task) => task.status === status).sort((a, b) => a.order - b.order).map((task, i) => ({...task, order: i}))
               
         );
-        onSuccess(restored);
+        onSuccess(reindexed);
       } else {
         onError("Arquivo inválido: deve ser um array de tarefas válidas.");
       }
