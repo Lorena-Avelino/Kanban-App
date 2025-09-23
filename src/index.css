@@ -1,3 +1,9 @@
 @import "tailwindcss";
 
-/* @import "tailwind/utilities"; */
+.mantine-Notifications-root {
+  position: fixed !important;
+  top: 16px !important;
+  right: 16px !important;
+  bottom: auto !important;
+  z-index: 9999 !important;
+}

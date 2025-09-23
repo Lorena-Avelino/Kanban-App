@@ -1,8 +1,10 @@
-import { Title } from "@mantine/core";
+import { Text, Title } from "@mantine/core";
 import type { Task } from "../types/task";
 import { TaskCard } from "./TaskCard";
 import { useTasks } from "../hooks/useTasks";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
+import { notifications } from "@mantine/notifications";
+import { modals } from "@mantine/modals";
 
 interface TaskColumnProps {
   title: string;
@@ -14,9 +16,7 @@ interface TaskColumnProps {
 export function TaskColumn({ title, status, tasks, onEdit }: TaskColumnProps) {
   const { removeTask } = useTasks();
 
-  const filteredTasks = tasks
-    .filter((task) => task.status === status)
-    .sort((a, b) => a.order - b.order);
+  const filteredTasks = tasks.filter((task) => task.status === status);
 
   const handleEdit = (task: Task) => {
     onEdit ? onEdit(task) : () => {};
@@ -47,7 +47,28 @@ export function TaskColumn({ title, status, tasks, onEdit }: TaskColumnProps) {
                     <TaskCard
                       task={task}
                       onEdit={() => handleEdit(task)}
-                      onDelete={() => removeTask(task.id)}
+                      onDelete={() => {
+                        modals.openConfirmModal({
+                          title: "Confirmar exclusão",
+                          centered: true,
+                          children: (
+                            <Text size="sm">
+                              Tem certeza que deseja excluir a tarefa{" "}
+                              <b>{task.title}</b>?
+                            </Text>
+                          ),
+                          labels: { confirm: "Excluir", cancel: "Cancelar" },
+                          confirmProps: { color: "red" },
+                          onConfirm: () => {
+                            removeTask(task.id);
+                            notifications.show({
+                              title: "Removida",
+                              message: "Tarefa deletada com sucesso 🗑️",
+                              color: "red",
+                            });
+                          },
+                        });
+                      }}
                     />
                   </div>
                 )}

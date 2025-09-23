@@ -9,6 +9,7 @@ interface TasksContextType {
   editTask: (id: string, updates: Partial<Task>) => void;
   removeTask: (id: string) => void;
   moveTask: (id: string, status: Task["status"], order?: number) => void;
+  setAllTasks: (newTasks: Task[]) => void;
 }
 
 const TasksContext = createContext<TasksContextType | undefined>(undefined);
@@ -97,9 +98,13 @@ export function TasksProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const setAllTasks = (newTasks: Task[]) => {
+    setTasks(newTasks);
+  };
+
   return (
     <TasksContext.Provider
-      value={{ tasks, addTask, editTask, removeTask, moveTask }}
+      value={{ tasks, addTask, editTask, removeTask, moveTask, setAllTasks }}
     >
       {children}
     </TasksContext.Provider>
